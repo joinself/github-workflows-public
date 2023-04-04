@@ -21,6 +21,7 @@ jobs:
       - name: License check
         shell: bash
         run: |
+          . ${GITHUB_WORKSPACE}/.ci/env
           # chown -R root:root .
           # source /root/.profile
           if [[ -f Gemfile ]]; then
