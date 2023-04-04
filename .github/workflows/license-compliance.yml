@@ -33,9 +33,7 @@ jobs:
           exit 1
         continue-on-error: ${{ inputs.continue-on-error }}
       - name: Failure notification
-        if: ${{ failure() }}
-        #if: ${{ github.ref == 'refs/heads/main' && failure() }}
+        if: ${{ github.ref == 'refs/heads/main' && failure() }}
         uses: joinself/github-actions-public/failure-notification@main
-        #uses: ./.github/actions/failure-notification
         with:
           slack-webhook: ${{ secrets.SLACK_WEBHOOK_CI_ALERTS }}
