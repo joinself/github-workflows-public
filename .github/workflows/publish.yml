@@ -5,13 +5,12 @@ on:
 
 jobs:
   publish:
-    #if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
-    #needs: []
     container:
       image: joinself/tools
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SLACK_WEBHOOK_CI_CI: ${{ secrets.SLACK_WEBHOOK_CI_CI }}
     steps:
       - name: Setup job
         uses: joinself/github-actions-public/setup-job@main
