@@ -1,0 +1,33 @@
+name: License compliance
+
+on:
+  workflow_call:
+    inputs:
+      container-image:
+        type: string
+        default: joinself/license-finder:go
+      continue-on-error:
+        type: boolean
+        default: false
+
+jobs:
+  license-compliance:
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ inputs.container-image }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: License check
+        shell: bash
+        run: |
+          # chown -R root:root .
+          # source /root/.profile
+          if [[ -f Gemfile ]]; then
+            bundle install
+          elif [[ -f package.json ]]; then
+            npm install
+          fi
+          curl -Lo /tmp/dependency_decisions.yml https://static.joinself.com/license-finder/dependency_decisions.yml
+          license_finder --decisions_file /tmp/dependency_decisions.yml
+        continue-on-error: ${{ inputs.continue-on-error }}
