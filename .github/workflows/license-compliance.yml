@@ -16,8 +16,8 @@ jobs:
     container:
       image: ${{ inputs.container-image }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Setup job
+        uses: joinself/github-actions-public/setup-job@main
       - name: License check
         shell: bash
         run: |
