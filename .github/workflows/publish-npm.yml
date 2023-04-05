@@ -3,66 +3,83 @@ name: Publish npm
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     container:
-      image: joinself/tools
+      image: node:18.15.0-bullseye-slim
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SLACK_WEBHOOK_CI_CI: ${{ secrets.SLACK_WEBHOOK_CI_CI }}
     steps:
       - name: Setup job
         uses: joinself/github-actions-public/setup-job@main
+      - name: Setup environment
+        run: |
+          apt-get update
+          apt-get install -y curl git
+          curl -Lo /tmp/gh.deb https://github.com/cli/cli/releases/download/v2.23.0/gh_2.23.0_linux_amd64.deb
+          apt-get install -y /tmp/gh.deb
       - name: Publish
-        shell: bash
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
           chown root:root .
 
-          exit 1
 
           # setup git
           git config --global user.name ci
           git config --global user.email ops@joinself.com
 
-          # get new version
+          # get version
+          version=$(grep '"version":' package.json | awk '{print $2}' | tr -d '",')
           branch=$(git branch --show-current)
-          tags=$(git tag --merged ${branch} | sort -V)
-          commit_message=$(git show -s --format=%s)
-          if [[ "${tags}" == "" ]]; then
-            version="0.1.0"
+          current_git_tag=$(git tag --merged ${branch} | sort -V | tail -n 1)
+          #subject=$(git log -n 1 --format=%s)
+          #body=$(git log -n 1 --format=%b | grep -E '^\*|^-' | sed 's/^*/-/g') || true
+          #if [[ -z ${body} ]]; then
+          #  release_notes="- ${subject}"
+          #else
+          #  release_notes="${body}"
+          #fi
+
+          if [[ "${version}" != "${current_git_tag}" ]]; then
+            # create git tag
+            git tag -a ${version} -m "${version}"
+            git push origin ${version}
+
+            # create github release
+            subject=$(git log -n 1 --format=%s)
+            body=$(git log -n 1 --format=%b | grep -E '^\*|^-' | sed 's/^*/-/g') || true
+            if [[ -z ${body} ]]; then
+              release_notes="- ${subject}"
+            else
+              release_notes="${body}"
+            fi
+            gh release create "${version}" --notes "${release_notes}"
+
+            # publish to npm
+            #if ! npm view self-sdk versions | grep $version; then
+              #tar -zxf artefacts.tar.gz
+              npm config set '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'
+              npm publish --dry-run --access public
+              #${SCRIPTS_DIR}/slack-release-notification -n joinself -v ${version}
+              #else
+              #echo "Package version already exists. Nothing to do here."
+              #fi
+
+            # slack release notification
+            #slack-release-notification -v ${version}
           else
-            current_version=$(echo "${tags}" | tail -n 1)
-            case $commit_message in
-              *\[bump-major\]*)
-                version=$(semver bump major $current_version)
-                ;;
-              *\[bump-patch\]*)
-                version=$(semver bump patch $current_version)
-                ;;
-              *)
-                version=$(semver bump minor $current_version)
-                ;;
-            esac
+            echo "Version hasn't changed. Nothing to do here."
           fi
 
-          # create git tag
-          git tag -a ${version} -m "${version}"
-          git push origin ${version}
 
-          # create github release
-          subject=$(git log -n 1 --format=%s)
-          body=$(git log -n 1 --format=%b | grep -E '^\*|^-' | sed 's/^*/-/g') || true
-          if [[ -z ${body} ]]; then
-            release_notes="- ${subject}"
-          else
-            release_notes="${body}"
-          fi
-          gh release create "${version}" --notes "${release_notes}"
-
-          # slack release notification
-          slack-release-notification -v ${version}
       - name: Failure notification
         if: ${{ github.ref == 'refs/heads/main' && failure() }}
         uses: joinself/github-actions-public/failure-notification@main
