@@ -24,6 +24,10 @@ jobs:
           apt-get install -y /tmp/gh.deb
       - name: Setup job
         uses: joinself/github-actions-public/setup-job@main
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts
       - name: Publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -65,7 +69,7 @@ jobs:
 
             # publish to npm
             #if ! npm view self-sdk versions | grep $version; then
-              #tar -zxf artefacts.tar.gz
+            tar -zxf artifacts.tar.gz
             npm config set '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'
             npm publish --access public
               #${SCRIPTS_DIR}/slack-release-notification -n joinself -v ${version}
