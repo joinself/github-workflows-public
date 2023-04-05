@@ -19,7 +19,7 @@ jobs:
           apt-get install -y curl git python3
           curl -Lo /tmp/gh.deb https://github.com/cli/cli/releases/download/v2.23.0/gh_2.23.0_linux_amd64.deb
           apt-get install -y /tmp/gh.deb
-          curl -Lo /usr/bin/local/slack-release-notification https://static.joinself.com/scripts/slack-release-notification
+          curl -Lo /usr/local/bin/slack-release-notification https://static.joinself.com/scripts/slack-release-notification
           chmod +x /usr/local/bin/slack-release-notification
       - name: Setup job
         uses: joinself/github-actions-public/setup-job@main
