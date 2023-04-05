@@ -81,7 +81,7 @@ jobs:
 
 
       - name: Failure notification
-        if: ${{ github.ref == 'refs/heads/main' && failure() }}
+        if: ${{ github.ref == 'refs/heads/main-disable' && failure() }}
         uses: joinself/github-actions-public/failure-notification@main
         with:
           slack-webhook: ${{ secrets.SLACK_WEBHOOK_CI_ALERTS }}
