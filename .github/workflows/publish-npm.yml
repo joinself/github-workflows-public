@@ -66,8 +66,8 @@ jobs:
             # publish to npm
             #if ! npm view self-sdk versions | grep $version; then
               #tar -zxf artefacts.tar.gz
-              npm config set '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'
-              npm publish --dry-run --access public
+            npm config set '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'
+            npm publish --access public
               #${SCRIPTS_DIR}/slack-release-notification -n joinself -v ${version}
               #else
               #echo "Package version already exists. Nothing to do here."
