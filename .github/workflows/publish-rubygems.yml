@@ -37,10 +37,15 @@ jobs:
           git config --global user.name ci
           git config --global user.email ops@joinself.com
 
+          echo "hit1"
           version=$(grep 'VERSION = ' ./lib/version.rb | tr -d '"' | awk '{print $3}')
           #version=$(grep '"version":' package.json | awk '{print $2}' | tr -d '",')
           #branch=$(git branch --show-current)
-          current_git_tag=$(git tag --merged ${CI_REF_NAME} | sort -V | tail -n 1)
+          echo "hit2"
+          current_git_tag=$(git tag --merged ci-migration-278 | sort -V | tail -n 1)
+          echo "hit3"
+          #current_git_tag=$(git tag --merged ${CI_REF_NAME} | sort -V | tail -n 1)
+          #current_git_tag=$(git tag --merged ${CI_REF_NAME} | sort -V | tail -n 1)
           if [[ "${version}" != "${current_git_tag}" ]]; then
             git tag -a ${version} -m "${version}"
             git push origin ${version}
