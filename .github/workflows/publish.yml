@@ -8,23 +8,20 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: joinself/tools
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SLACK_WEBHOOK_CI_CI: ${{ secrets.SLACK_WEBHOOK_CI_CI }}
     steps:
       - name: Setup job
         uses: joinself/github-actions-public/setup-job@main
       - name: Publish
         shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_CI_CI: ${{ secrets.SLACK_WEBHOOK_CI_CI }}
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
           chown root:root .
-
-          # setup git
           git config --global user.name ci
           git config --global user.email ops@joinself.com
 
-          # get new version
           branch=$(git branch --show-current)
           tags=$(git tag --merged ${branch} | sort -V)
           commit_message=$(git show -s --format=%s)
@@ -45,11 +42,9 @@ jobs:
             esac
           fi
 
-          # create git tag
           git tag -a ${version} -m "${version}"
           git push origin ${version}
 
-          # create github release
           subject=$(git log -n 1 --format=%s)
           body=$(git log -n 1 --format=%b | grep -E '^\*|^-' | sed 's/^*/-/g') || true
           if [[ -z ${body} ]]; then
@@ -59,7 +54,6 @@ jobs:
           fi
           gh release create "${version}" --notes "${release_notes}"
 
-          # slack release notification
           slack-release-notification -v ${version}
       - name: Failure notification
         if: ${{ github.ref == 'refs/heads/main' && failure() }}
