@@ -22,6 +22,7 @@ jobs:
         shell: bash
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
+          HOME=/root
           if [[ -f Gemfile ]]; then
             bundle install
           elif [[ -f package.json ]]; then
