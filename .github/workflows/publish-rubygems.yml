@@ -41,7 +41,7 @@ jobs:
           git config --global user.name ci
           git config --global user.email ops@joinself.com
 
-          version=$(grep -E '(version|VERSION) = ' ${{ inputs.gem-version-file }} | tr -d '"' | awk '{print $3}')
+        version=$(grep -E '(version|VERSION)[[:space:]]?=[[:space:]]?' ${{ inputs.gem-version-file }} | tr -d '"' | awk '{print $3}')
           current_git_tag=$(git tag --merged ${CI_REF_NAME} | sort -V | tail -n 1)
           if [[ "${version}" != "${current_git_tag}" ]]; then
             git tag -a ${version} -m "${version}"
