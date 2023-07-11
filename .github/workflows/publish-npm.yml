@@ -49,7 +49,6 @@ jobs:
               release_notes="${body}"
             fi
             gh release create "${version}" --notes "${release_notes}"
-            tar -zxf artifacts.tar.gz
             npm config set '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'
             npm publish --access public
             slack-release-notification -v ${version}
