@@ -32,6 +32,8 @@ jobs:
       - name: Publish
         shell: bash
         env:
+          GEM_NAME: ${{ inputs.gem-name }}
+          GEM_VERSION_FILE: ${{ inputs.gem-version-file }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
           SLACK_WEBHOOK_CI_CI: ${{ secrets.SLACK_WEBHOOK_CI_CI }}
@@ -41,7 +43,7 @@ jobs:
           git config --global user.name ci
           git config --global user.email ops@joinself.com
 
-          version=$(grep -E '(version|VERSION)[[:space:]]?=[[:space:]]?' ${{ inputs.gem-version-file }} | tr -d 'versionVERSION=" ')
+          version=$(grep -E '(version|VERSION)[[:space:]]?=[[:space:]]?' ${GEM_VERSION_FILE} | tr -d 'versionVERSION=" ')
           current_git_tag=$(git tag --merged ${CI_REF_NAME} | sort -V | tail -n 1)
           if [[ "${version}" != "${current_git_tag}" ]]; then
             git tag -a ${version} -m "${version}"
@@ -55,7 +57,7 @@ jobs:
             fi
             gh release create "${version}" --notes "${release_notes}"
 
-            gem push ${{ inputs.gem-name }}-${version}.gem
+            gem push ${GEM_NAME}-${version}.gem
 
             slack-release-notification -v ${version}
           else
