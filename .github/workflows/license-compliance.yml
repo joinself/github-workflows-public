@@ -22,6 +22,7 @@ jobs:
         shell: bash
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
+          chown -R root:root .
           HOME=/root
           if [[ -f Gemfile ]]; then
             bundle install
