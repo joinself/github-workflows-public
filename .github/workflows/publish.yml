@@ -15,7 +15,7 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SLACK_WEBHOOK_CI_CI: ${{ secrets.SLACK_WEBHOOK_CI_CI }}
+          SLACK_WEBHOOK_CI_PLATFORM: ${{ secrets.SLACK_WEBHOOK_CI_PLATFORM }}
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
           chown root:root .

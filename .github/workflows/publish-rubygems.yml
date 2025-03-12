@@ -36,7 +36,7 @@ jobs:
           GEM_VERSION_FILE: ${{ inputs.gem-version-file }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
-          SLACK_WEBHOOK_CI_CI: ${{ secrets.SLACK_WEBHOOK_CI_CI }}
+          SLACK_WEBHOOK_CI_PLATFORM: ${{ secrets.SLACK_WEBHOOK_CI_PLATFORM }}
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
           chown root:root .
