@@ -18,42 +18,11 @@ jobs:
           SLACK_WEBHOOK_CI_PLATFORM: ${{ secrets.SLACK_WEBHOOK_CI_PLATFORM }}
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
-          chown root:root .
-          git config --global user.name ci
-          git config --global user.email ops@joinself.com
 
-          branch=$(git branch --show-current)
-          tags=$(git tag --merged ${branch} | sort -V)
-          commit_message=$(git show -s --format=%s)
-          if [[ "${tags}" == "" ]]; then
-            version="0.1.0"
-          else
-            current_version=$(echo "${tags}" | tail -n 1)
-            case $commit_message in
-              *\[bump-major\]*)
-                version=$(semver bump major $current_version)
-                ;;
-              *\[bump-patch\]*)
-                version=$(semver bump patch $current_version)
-                ;;
-              *)
-                version=$(semver bump minor $current_version)
-                ;;
-            esac
-          fi
-
-          git tag -a ${version} -m "${version}"
-          git push origin ${version}
-
-          subject=$(git log -n 1 --format=%s)
-          body=$(git log -n 1 --format=%b | grep -E '^\*|^-' | sed 's/^*/-/g') || true
-          if [[ -z ${body} ]]; then
-            release_notes="- ${subject}"
-          else
-            release_notes="${body}"
-          fi
+          version=$(${CI_SCRIPTS}/get-new-version)
+          ${CI_SCRIPTS}/git-create-tag -v ${version}
+          release_notes=$(${CI_SCRIPTS}/git-get-release-notes)
           gh release create "${version}" --notes "${release_notes}"
-
           slack-release-notification -v ${version}
       - name: Failure notification
         if: ${{ github.ref == 'refs/heads/main' && failure() }}
