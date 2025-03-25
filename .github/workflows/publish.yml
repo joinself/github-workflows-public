@@ -22,7 +22,7 @@ jobs:
           version=$(${CI_SCRIPTS}/get-new-version)
           ${CI_SCRIPTS}/git-create-tag -v ${version}
           release_notes=$(${CI_SCRIPTS}/git-get-release-notes)
-          gh release create "${version}" --notes "${release_notes}"
+          gh release create "${version}" --prerelease --notes "${release_notes}"
           slack-release-notification -v ${version}
       - name: Failure notification
         if: ${{ github.ref == 'refs/heads/main' && failure() }}
