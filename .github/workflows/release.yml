@@ -1,0 +1,25 @@
+name: Release
+
+on: 
+  workflow_call:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    container:
+      image: joinself/tools
+    steps:
+      - name: Setup job
+        uses: joinself/github-actions-public/setup-job@main
+      - name: Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLACK_WEBHOOK_CI_PLATFORM: ${{ secrets.SLACK_WEBHOOK_CI_PLATFORM }}
+        run: |
+          . ${GITHUB_WORKSPACE}/.ci/env
+          version=$(${CI_SCRIPTS}/get-current-version)
+          release_version="${version%-*}"
+          ${CI_SCRIPTS}/git-create-tag -v ${release_version}
+          gh release create "${release_version}"
+          ${CI_SCRIPTS}/slack-release-notification -v ${release_version}
