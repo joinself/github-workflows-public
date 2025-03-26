@@ -18,12 +18,11 @@ jobs:
           SLACK_WEBHOOK_CI_PLATFORM: ${{ secrets.SLACK_WEBHOOK_CI_PLATFORM }}
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
-
           version=$(${CI_SCRIPTS}/get-new-version)
           ${CI_SCRIPTS}/git-create-tag -v ${version}
           release_notes=$(${CI_SCRIPTS}/git-get-release-notes)
           gh release create "${version}" --prerelease --notes "${release_notes}"
-          slack-release-notification -v ${version}
+          ${CI_SCRIPTS}/slack-release-notification -v ${version}
       - name: Failure notification
         if: ${{ github.ref == 'refs/heads/main' && failure() }}
         uses: joinself/github-actions-public/failure-notification@main

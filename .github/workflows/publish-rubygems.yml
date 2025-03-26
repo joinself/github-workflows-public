@@ -39,9 +39,6 @@ jobs:
           SLACK_WEBHOOK_CI_PLATFORM: ${{ secrets.SLACK_WEBHOOK_CI_PLATFORM }}
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
-          chown root:root .
-          git config --global user.name ci
-          git config --global user.email ops@joinself.com
 
           version=$(grep -E '(version|VERSION)[[:space:]]?=[[:space:]]?' ${GEM_VERSION_FILE} | tr -d 'versionVERSION=" ')
           current_git_tag=$(git tag --merged ${CI_REF_NAME} | sort -V | tail -n 1)
@@ -59,7 +56,7 @@ jobs:
 
             gem push ${GEM_NAME}-${version}.gem
 
-            slack-release-notification -v ${version}
+            ${CI_SCRIPTS}/slack-release-notification -v ${version}
           else
             echo "Version hasn't changed. Nothing to do here."
           fi
