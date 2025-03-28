@@ -18,8 +18,16 @@ jobs:
           SLACK_WEBHOOK_CI_PLATFORM: ${{ secrets.SLACK_WEBHOOK_CI_PLATFORM }}
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
-          version=$(${CI_SCRIPTS}/get-current-version)
-          release_version="${version%-*}"
+          current_version=$(${CI_SCRIPTS}/get-current-version)
+          release_version="${current_version%-*}"
           ${CI_SCRIPTS}/git-create-tag -v ${release_version}
-          gh release create "${release_version}"
+          
+          main_current_release=$(${CI_SCRIPTS}/get-current-version --branch origin/main --type release)
+          patch_version="${release_version#*.*.}"
+          if [[ "${patch_version}" != 0 ]] && [[ "${main_current_release%.*}" != "${release_version%.*}" ]]; then
+            gh release create "${release_version}" --latest=false
+          else
+            gh release create "${release_version}"
+          fi
+          
           ${CI_SCRIPTS}/slack-release-notification -v ${release_version}
