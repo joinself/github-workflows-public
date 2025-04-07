@@ -23,8 +23,3 @@ jobs:
           release_notes=$(${CI_SCRIPTS}/git-get-release-notes)
           gh release create "${version}" --prerelease --notes "${release_notes}"
           ${CI_SCRIPTS}/slack-release-notification -v ${version}
-      - name: Failure notification
-        if: ${{ github.ref == 'refs/heads/main' && failure() }}
-        uses: joinself/github-actions-public/failure-notification@main
-        with:
-          slack-webhook: ${{ secrets.SLACK_WEBHOOK_CI_ALERTS }}
