@@ -2,6 +2,9 @@ name: Publish
 
 on:
   workflow_call:
+    inputs:
+      git-tag-prefix:
+        type: string
 
 jobs:
   publish:
@@ -14,12 +17,13 @@ jobs:
       - name: Publish
         shell: bash
         env:
+          GIT_TAG_PREFIX: ${{ inputs.git-tag-prefix }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLACK_WEBHOOK_CI_PLATFORM: ${{ secrets.SLACK_WEBHOOK_CI_PLATFORM }}
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
           version=$(${CI_SCRIPTS}/get-new-version)
-          ${CI_SCRIPTS}/git-create-tag -v ${version}
+          ${CI_SCRIPTS}/git-create-tag -v ${GIT_TAG_PREFIX}${version}
           release_notes=$(${CI_SCRIPTS}/git-get-release-notes)
-          gh release create "${version}" --prerelease --notes "${release_notes}"
-          ${CI_SCRIPTS}/slack-release-notification -v ${version}
+          gh release create "${GIT_TAG_PREFIX}${version}" --prerelease --notes "${release_notes}"
+          ${CI_SCRIPTS}/slack-release-notification -v ${GIT_TAG_PREFIX}${version}
