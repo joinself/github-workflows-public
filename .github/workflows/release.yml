@@ -7,7 +7,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     container:
-      image: joinself/tools
+      image: ghcr.io/joinself/tools
     steps:
       - name: Setup job
         uses: joinself/github-actions-public/setup-job@main

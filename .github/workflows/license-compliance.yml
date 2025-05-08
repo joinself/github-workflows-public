@@ -5,7 +5,7 @@ on:
     inputs:
       container-image:
         type: string
-        default: joinself/license-finder:go
+        default: ghcr.io/joinself/license-finder:go
       continue-on-error:
         type: boolean
         default: false
