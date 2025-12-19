@@ -1,6 +1,6 @@
 name: Release
 
-on: 
+on:
   workflow_call:
 
 jobs:
@@ -18,10 +18,13 @@ jobs:
           SLACK_WEBHOOK_CI_PLATFORM: ${{ secrets.SLACK_WEBHOOK_CI_PLATFORM }}
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
+
           current_version=$(${CI_SCRIPTS}/get-current-version)
           release_version="${current_version%-*}"
-          ${CI_SCRIPTS}/git-create-tag -v ${release_version}
-          
+
+          git tag -a ${release_version} -m "${release_version}"
+          git push origin ${version}
+
           main_current_release=$(${CI_SCRIPTS}/get-current-version --branch origin/main --type release)
           patch_version="${release_version#*.*.}"
           if [[ "${patch_version}" != 0 ]] && [[ "${main_current_release%.*}" != "${release_version%.*}" ]]; then
@@ -29,5 +32,5 @@ jobs:
           else
             gh release create "${release_version}"
           fi
-          
+
           ${CI_SCRIPTS}/slack-release-notification -v ${release_version}
