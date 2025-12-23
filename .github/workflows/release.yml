@@ -24,11 +24,14 @@ jobs:
 
           git tag -a ${release_version} -m "${release_version}"
           git push origin ${release_version}
-          git checkout -b release-${release_version%.*}
-          git push origin release-${release_version%.*}
+
+          patch_version="${release_version#*.*.}"
+          if [[ "${patch_version}" == "0" ]]; then
+            git checkout -b release-${release_version%.*}
+            git push origin release-${release_version%.*}
+          fi
 
           main_current_release=$(${CI_SCRIPTS}/get-current-version --branch origin/main --type release)
-          patch_version="${release_version#*.*.}"
           if [[ "${patch_version}" != 0 ]] && [[ "${main_current_release%.*}" != "${release_version%.*}" ]]; then
             gh release create "${release_version}" --latest=false
           else
