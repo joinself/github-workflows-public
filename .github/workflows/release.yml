@@ -2,6 +2,11 @@ name: Release
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: "Git tag to release e.g. 1.2.3-4"
+        type: string
+        required: true
 
 jobs:
   release:
@@ -11,6 +16,8 @@ jobs:
     steps:
       - name: Setup job
         uses: joinself/github-actions-public/setup-job@main
+        with:
+          git-ref: ${{ inputs.version }}
       - name: Release
         shell: bash
         env:
