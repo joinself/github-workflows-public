@@ -21,8 +21,6 @@ jobs:
         run: |
           curl -Lo /tmp/gh.deb https://github.com/cli/cli/releases/download/v2.23.0/gh_2.23.0_linux_amd64.deb
           apt-get install -y /tmp/gh.deb
-          curl -Lo /usr/local/bin/slack-release-notification https://static.joinself.com/scripts/slack-release-notification
-          chmod +x /usr/local/bin/slack-release-notification
       - name: Setup job
         uses: joinself/github-actions-public/setup-job@main
       - name: Download artifacts
@@ -36,7 +34,6 @@ jobs:
           GEM_VERSION_FILE: ${{ inputs.gem-version-file }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
-          SLACK_WEBHOOK_CI_PLATFORM: ${{ secrets.SLACK_WEBHOOK_CI_PLATFORM }}
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
 
@@ -55,8 +52,6 @@ jobs:
             gh release create "${version}" --notes "${release_notes}"
 
             gem push ${GEM_NAME}-${version}.gem
-
-            ${CI_SCRIPTS}/slack-release-notification -v ${version}
           else
             echo "Version hasn't changed. Nothing to do here."
           fi

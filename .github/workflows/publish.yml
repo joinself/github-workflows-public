@@ -19,7 +19,6 @@ jobs:
         env:
           GIT_TAG_PREFIX: ${{ inputs.git-tag-prefix }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SLACK_WEBHOOK_CI_PLATFORM: ${{ secrets.SLACK_WEBHOOK_CI_PLATFORM }}
         run: |
           . ${GITHUB_WORKSPACE}/.ci/env
 
@@ -30,5 +29,3 @@ jobs:
 
           release_notes=$(${CI_SCRIPTS}/git-get-release-notes)
           gh release create "${GIT_TAG_PREFIX}${version}" --prerelease --notes "${release_notes}"
-
-          ${CI_SCRIPTS}/slack-release-notification -v ${GIT_TAG_PREFIX}${version}
