@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/joinself/tools
+    permissions:
+      contents: write
     steps:
       - name: Setup job
         uses: joinself/github-actions-public/setup-job@main
