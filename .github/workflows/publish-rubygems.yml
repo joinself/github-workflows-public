@@ -10,6 +10,13 @@ on:
         type: string
         default: ${{ github.event.repository.name }}.gemspec
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -18,29 +25,23 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v6
       - name: Setup environment
-        shell: bash
         run: |
           curl -Lo /tmp/gh.deb https://github.com/cli/cli/releases/download/v2.23.0/gh_2.23.0_linux_amd64.deb
           apt-get install -y /tmp/gh.deb
-      - name: Setup job
-        uses: joinself/github-actions-public/setup-job@main
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: artifacts
       - name: Publish
-        shell: bash
         env:
           GEM_NAME: ${{ inputs.gem-name }}
           GEM_VERSION_FILE: ${{ inputs.gem-version-file }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
         run: |
-          . ${GITHUB_WORKSPACE}/.ci/env
-
           version=$(grep -E '(version|VERSION)[[:space:]]?=[[:space:]]?' ${GEM_VERSION_FILE} | tr -d 'versionVERSION=" ')
-          current_git_tag=$(git tag --merged ${CI_REF_NAME} | sort -V | tail -n 1)
+          current_git_tag=$(git tag --merged ${GITHUB_REF_NAME} | sort -V | tail -n 1)
           if [[ "${version}" != "${current_git_tag}" ]]; then
             git tag -a ${version} -m "${version}"
             git push origin ${version}

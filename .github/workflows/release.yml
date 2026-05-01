@@ -8,6 +8,13 @@ on:
         type: string
         required: true
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -16,18 +23,15 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Setup job
-        uses: joinself/github-actions-public/setup-job@main
+      - uses: joinself/actions-public/setup-job@main
+      - uses: actions/checkout@v6
         with:
-          git-ref: ${{ inputs.version }}
+          ref: ${{ inputs.version }}
       - name: Release
-        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          . ${GITHUB_WORKSPACE}/.ci/env
-
-          current_version=$(${CI_SCRIPTS}/get-current-version)
+          current_version=$(${SCRIPTS}/get-current-version)
           release_version="${current_version%-*}"
 
           git tag -a ${release_version} -m "${release_version}"
@@ -39,7 +43,7 @@ jobs:
             git push origin release-${release_version%.*}
           fi
 
-          main_current_release=$(${CI_SCRIPTS}/get-current-version --branch origin/main --type release)
+          main_current_release=$(${SCRIPTS}/get-current-version --branch origin/main --type release)
           if [[ "${patch_version}" != 0 ]] && [[ "${main_current_release%.*}" != "${release_version%.*}" ]]; then
             gh release create "${release_version}" --latest=false
           else

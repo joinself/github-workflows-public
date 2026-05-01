@@ -10,18 +10,23 @@ on:
         type: boolean
         default: false
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
   license-compliance:
     runs-on: ubuntu-latest
     container:
       image: ${{ inputs.container-image }}
     steps:
-      - name: Setup job
-        uses: joinself/github-actions-public/setup-job@main
+      - uses: actions/checkout@v6
       - name: License check
-        shell: bash
         run: |
-          . ${GITHUB_WORKSPACE}/.ci/env
           HOME=/root
           if [[ -f Gemfile ]]; then
             bundle install
