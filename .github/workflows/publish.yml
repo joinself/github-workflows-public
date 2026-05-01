@@ -6,9 +6,6 @@ on:
       git-tag-prefix:
         type: string
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-
 defaults:
   run:
     shell: bash
