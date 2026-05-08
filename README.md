@@ -1,4 +1,4 @@
-# GitHub Workflows Public
+# GitHub Workflows
 
 GitHub workflows for public repositories.
 

@@ -13,10 +13,9 @@ defaults:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/joinself/tools
     permissions:
       contents: write
+    timeout-minutes: 15
     steps:
       - uses: joinself/actions-public/setup-job@main
       - uses: actions/checkout@v6
@@ -29,8 +28,8 @@ jobs:
         run: |
           version=$(${SCRIPTS}/get-new-version)
 
-          git tag -a ${GIT_TAG_PREFIX}${version} -m "${GIT_TAG_PREFIX}${version}"
-          git push origin ${GIT_TAG_PREFIX}${version}
+          git tag -a "${GIT_TAG_PREFIX}${version}" -m "${GIT_TAG_PREFIX}${version}"
+          git push origin "${GIT_TAG_PREFIX}${version}"
 
           release_notes=$(${SCRIPTS}/git-get-release-notes)
           gh release create "${GIT_TAG_PREFIX}${version}" --prerelease --notes "${release_notes}"
